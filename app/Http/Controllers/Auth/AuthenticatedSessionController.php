@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Providers\RouteServiceProvider;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -35,9 +34,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Update session ID in database immediately after login
-        $user = Auth::user();
-        $user->session_id = session()->getId();
-        $user->save();
+        $request->user()->update(['session_id' => session()->getId()]);
 
         return redirect()->intended('dashboard');
     }
@@ -47,9 +44,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        $user->session_id = null;  // Clear the session ID on logout
-        $user->save();
+        $request->user()->update(['session_id' => null]);
 
         Auth::guard('web')->logout();
 
